@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAN 310: Indigenous Planning Quiz</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --text-main: #2d3748;
+            --primary: #2b6cb0;
+            --primary-hover: #2c5282;
+            --correct: #38a169;
+            --incorrect: #e53e3e;
+            --card-bg: #ffffff;
+            --font-stack: system-ui, -apple-system, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        header, footer {
+            background-color: var(--card-bg);
+            padding: 1.5rem 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        header h1 { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        header h2 { font-size: 1.2rem; font-weight: 400; color: #4a5568; margin-top: 0.5rem; }
+        footer { margin-top: auto; font-size: 1rem; color: #718096; box-shadow: 0 -2px 4px rgba(0,0,0,0.05); }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+        #quiz-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        #progress { font-size: 1.1rem; color: #718096; margin-bottom: 1rem; font-weight: 600; }
+        #question { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+        .choices { display: flex; flex-direction: column; gap: 1rem; }
+        
+        button {
+            font-family: var(--font-stack);
+            font-size: 1.2rem;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover:not(:disabled) { border-color: var(--primary); background: #ebf8ff; }
+        button:disabled { cursor: default; }
+        button .key-hint {
+            display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px;
+            background: #e2e8f0; font-size: 0.9rem; margin-right: 1rem; font-weight: bold;
+        }
+
+        .btn-correct { background-color: var(--correct) !important; color: white !important; border-color: var(--correct) !important; }
+        .btn-incorrect { background-color: var(--incorrect) !important; color: white !important; border-color: var(--incorrect) !important; }
+        
+        #feedback { margin-top: 1.5rem; padding: 1.5rem; border-radius: 8px; display: none; font-size: 1.2rem; }
+        .feedback-correct { background-color: #f0fff4; border-left: 5px solid var(--correct); }
+        .feedback-incorrect { background-color: #fff5f5; border-left: 5px solid var(--incorrect); }
+        #feedback-title { font-weight: 700; margin-bottom: 0.5rem; }
+
+        .action-btn {
+            display: inline-block; width: 100%; margin-top: 1.5rem; padding: 1rem;
+            background-color: var(--primary); color: white; border: none; font-weight: 600;
+            text-align: center; border-radius: 8px; cursor: pointer;
+        }
+        .action-btn:hover { background-color: var(--primary-hover); }
+
+        #result-screen { display: none; text-align: center; }
+        #result-screen h3 { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+        #result-screen p { font-size: 1.3rem; margin-bottom: 2rem; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>PLAN 310</h1>
+        <h2>Topic: Indigenous Planning</h2>
+    </header>
+
+    <main>
+        <div id="quiz-card">
+            <!-- Quiz Screen -->
+            <div id="quiz-screen">
+                <div id="progress">Question 1 of 10</div>
+                <div id="question">Question text goes here?</div>
+                <div class="choices" id="choices"></div>
+                <div id="feedback">
+                    <div id="feedback-title"></div>
+                    <div id="feedback-text"></div>
+                    <button class="action-btn" id="next-btn">Next (Press Enter)</button>
+                </div>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen">
+                <h3>Quiz Complete!</h3>
+                <p id="score-text">You scored X out of 10.</p>
+                <button class="action-btn" id="restart-btn" onclick="startQuiz()">Try Again (Shuffle & Restart)</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Made by Dr. French with Gemini
+    </footer>
+
+    <script>
+        const allQuestions = [
+            {
+                q: "What was the goal of the settler state's assimilation policy in the US regarding Indigenous peoples?",
+                c: ["Extinction of Indigenous cultures and land rights.", "Establishment of shared governance.", "Promotion of Indigenous self-determination.", "Integration of traditional Indigenous food systems."],
+                a: 0, exp: "The assimilation policy aimed for the complete civilization of Indians, which served as extinction by other means and sought to destroy Indigenous peoples and cultures."
+            },
+            {
+                q: "What does the Kanaka Maoli concept of 'aina refer to?",
+                c: ["That which feeds.", "Land as a commodity.", "The right to the city.", "Urban growth boundaries."],
+                a: 0, exp: "In the Kanaka Maoli worldview, 'aina translates to land, or that which feeds."
+            },
+            {
+                q: "How does the capitalist/neoliberal worldview primarily view land?",
+                c: ["As a commodity.", "As a family member.", "As a shared public good.", "As a site of Indigenous resurgence."],
+                a: 0, exp: "Under the hegemony of capitalism, land is viewed as a commodity to be bought, sold, and put to its highest-order use."
+            },
+            {
+                q: "What is the fundamental challenge posed by Indigenous sovereignty to settler claims?",
+                c: ["It represents a conflict between opposing worldviews on how humans should live.", "It requires the immediate eviction of all settlers.", "It demands the construction of luxury condominiums.", "It relies entirely on the federal government for funding."],
+                a: 0, exp: "Indigenous sovereignty presents a fundamental challenge to settler claims because it is a conflict between two vastly different ideas of how human beings should live on this planet."
+            },
+            {
+                q: "What was a major consequence of the General Allotment Act (Dawes Act) of 1887 in the US?",
+                c: ["The massive loss of tribal lands and the fractionated ownership of reservations.", "The strengthening of the tribal social structure.", "The return of traditional lands to Indigenous peoples.", "The establishment of the Bureau of Indian Affairs."],
+                a: 0, exp: "The allotment policy led to nearly 100 million acres of land being lost to tribal ownership and left many reservations with a highly fractionated checkerboard pattern of ownership."
+            },
+            {
+                q: "Which federal act in 1934 aimed to rebuild the Indian land base and advance reservation self-government?",
+                c: ["The Indian Reorganization Act.", "The Indian Self-Determination and Education Assistance Act.", "The General Allotment Act.", "The House Concurrent Resolution 108."],
+                a: 0, exp: "The Indian Reorganization Act (IRA) of 1934 aimed at rebuilding the Indian land base and advancing reservation self-government."
+            },
+            {
+                q: "The termination policy of the 1950s sought to do what to Indigenous reservations in the US?",
+                c: ["End federal responsibility and dissolve the reservations.", "Expand the size of the reservations.", "Provide more funding for Indigenous housing.", "Strengthen Indigenous self-determination."],
+                a: 0, exp: "The termination policy proposed to abrogate federal responsibility, end essential services, and effectively cease the existence of terminated reservations."
+            },
+            {
+                q: "What is the meaning of aloha 'aina in the context of Kanaka Maoli resistance?",
+                c: ["A relationship of responsibility and respect between the land and its people.", "The development of urban industrial centers.", "The integration of Indigenous peoples into the capitalist economy.", "A Hawaiian state holiday."],
+                a: 0, exp: "Aloha 'aina refers to love for the land, establishing a relationship of responsibility and respect, and has been enacted as resistance against colonialism."
+            },
+            {
+                q: "How does Indigenous planning respond to the challenges of settler colonialism?",
+                c: ["By asserting self-determination and shaping planning institutions to reflect Indigenous cultural norms.", "By fully adopting the synoptic rational model of planning.", "By eliminating all forms of economic development.", "By relinquishing claims to sovereignty."],
+                a: 0, exp: "Indigenous planning acts as a vehicle for Indigenous peoples to enact self-determination and shape their own institutions and practices."
+            },
+            {
+                q: "What does an \"urban aloha 'aina\" framework demand regarding city development?",
+                c: ["Recognizing that all development occurs on Indigenous land and reestablishing Indigenous connections to urban spaces.", "Focusing solely on creating luxury housing in the urban core.", "Ignoring historical treaties to promote rapid growth.", "Confining Indigenous peoples strictly to rural areas."],
+                a: 0, exp: "An urban aloha 'aina acknowledges that all development occurs on Indigenous land and requires a commitment to reestablishing Indigenous connections to that land."
+            }
+        ];
+
+        let questions = [];
+        let currentIdx = 0;
+        let score = 0;
+        let hasAnswered = false;
+
+        const ui = {
+            quizScreen: document.getElementById('quiz-screen'),
+            resultScreen: document.getElementById('result-screen'),
+            progress: document.getElementById('progress'),
+            question: document.getElementById('question'),
+            choices: document.getElementById('choices'),
+            feedback: document.getElementById('feedback'),
+            feedbackTitle: document.getElementById('feedback-title'),
+            feedbackText: document.getElementById('feedback-text'),
+            nextBtn: document.getElementById('next-btn'),
+            scoreText: document.getElementById('score-text')
+        };
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            questions = [...allQuestions];
+            shuffleArray(questions);
+            currentIdx = 0;
+            score = 0;
+            ui.quizScreen.classList.remove('hidden');
+            ui.resultScreen.classList.add('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            hasAnswered = false;
+            ui.feedback.style.display = 'none';
+            const qData = questions[currentIdx];
+            
+            ui.progress.textContent = `Question ${currentIdx + 1} of ${questions.length}`;
+            ui.question.textContent = qData.q;
+            
+            ui.choices.innerHTML = '';
+            qData.c.forEach((choiceText, i) => {
+                const btn = document.createElement('button');
+                btn.innerHTML = `<span class="key-hint">${i + 1}</span> ${choiceText}`;
+                btn.onclick = () => handleAnswer(i);
+                btn.id = `choice-${i}`;
+                ui.choices.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIndex) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            
+            const qData = questions[currentIdx];
+            const isCorrect = selectedIndex === qData.a;
+            if (isCorrect) score++;
+
+            // Update UI styling
+            const buttons = ui.choices.querySelectorAll('button');
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === qData.a) btn.classList.add('btn-correct');
+                else if (i === selectedIndex) btn.classList.add('btn-incorrect');
+                btn.querySelector('.key-hint').style.backgroundColor = 'transparent';
+            });
+
+            // Show Feedback
+            ui.feedback.className = isCorrect ? 'feedback-correct' : 'feedback-incorrect';
+            ui.feedbackTitle.textContent = isCorrect ? 'Correct!' : 'Incorrect';
+            ui.feedbackTitle.style.color = isCorrect ? 'var(--correct)' : 'var(--incorrect)';
+            ui.feedbackText.textContent = qData.exp;
+            ui.feedback.style.display = 'block';
+            
+            // Scroll to feedback on smaller screens
+            ui.feedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function nextQuestion() {
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            ui.quizScreen.classList.add('hidden');
+            ui.resultScreen.classList.remove('hidden');
+            ui.scoreText.textContent = `You scored ${score} out of ${questions.length}.`;
+        }
+
+        ui.nextBtn.addEventListener('click', nextQuestion);
+
+        document.addEventListener('keydown', (e) => {
+            if (!hasAnswered && ui.quizScreen.classList.contains('hidden') === false) {
+                if (e.key >= '1' && e.key <= '4') {
+                    handleAnswer(parseInt(e.key) - 1);
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!ui.quizScreen.classList.contains('hidden') && hasAnswered) {
+                    nextQuestion();
+                } else if (!ui.resultScreen.classList.contains('hidden')) {
+                    startQuiz();
+                }
+            }
+        });
+
+        // Initialize App
+        startQuiz();
+    </script>
+</body>
+</html>
